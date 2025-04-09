@@ -1,4 +1,4 @@
-const { Client, Intents, guild, Collection } = require('discord.js');
+const { Client, Intents, Collection } = require('discord.js');
 const Discord = require("discord.js");
 const config = require('./config');
 const ping = require('./ping.js');
