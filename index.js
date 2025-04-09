@@ -1,4 +1,4 @@
-const { Client, Intents, MessageActionRow, MessageButton } = require('discord.js');
+const { Client, Intents, Collection, MessageActionRow, MessageButton } = require('discord.js');  // Ajout de Collection
 const Discord = require("discord.js");
 const config = require('./config');
 const { readdirSync } = require("fs");
@@ -31,7 +31,7 @@ const client = new Client({
 });
 
 client.login(process.env.token); // Remplace par client.login("TonToken")
-client.commands = new Collection();
+client.commands = new Collection();  // Utilisation de Collection
 
 const { GiveawaysManager } = require('discord-giveaways');
 client.giveawaysManager = new GiveawaysManager(client, {
