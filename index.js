@@ -95,24 +95,31 @@ for (const file of eventFiles) {
 
 //|▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬| INTERACTION BUTTON FIX |▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬|
 
-client.on('interactionCreate', async interaction => {
+client.on('interactionCreate', async (interaction) => {
+    // Vérifie si l'interaction est un bouton
+    if (!interaction.isButton()) return;
+
     try {
-        if (interaction.isButton()) {
-            if (!interaction.deferred && !interaction.replied) {
-                await interaction.deferUpdate().catch(() => {});
-            }
-
-            console.log(`Bouton cliqué: ${interaction.customId}`);
-
-            // Exemple de gestion de boutons
-            if (interaction.customId === 'suivant') {
-                // ta logique ici
-            } else if (interaction.customId === 'precedent') {
-                // ta logique ici
-            }
+        // Vérifie si l'interaction a déjà été traitée (répondue ou différée)
+        if (!interaction.replied && !interaction.deferred) {
+            await interaction.deferUpdate(); // Diffère l'interaction pour éviter l'erreur 'already acknowledged'
         }
+
+        console.log(`Bouton cliqué: ${interaction.customId}`); // Log de l'ID du bouton cliqué
+
+        // Gère les différents boutons en fonction de leur customId
+        if (interaction.customId === 'suivant') {
+            // Logique pour le bouton "suivant"
+            console.log("Bouton suivant cliqué");
+            // Ajoute ta logique ici (par exemple, changement de message ou autre)
+        } else if (interaction.customId === 'precedent') {
+            // Logique pour le bouton "précédent"
+            console.log("Bouton précédent cliqué");
+            // Ajoute ta logique ici
+        }
+
     } catch (err) {
-        console.error('Erreur interactionCreate :', err);
+        console.error('Erreur interactionCreate :', err); // Log des erreurs
     }
 });
 
