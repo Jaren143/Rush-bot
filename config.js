@@ -4,6 +4,6 @@ module.exports = {
         buyer: '650302390968385538', // Buyer
         couleur: '#6495ED', // Couleur HEX
         footer: '4Protect', // Dans la commande help ou autre il y'a un texte en bas
-        maxServer: '100', // Le nombre de serveur maximum que le bot peut rejoindre 
+        maxServer: '10', // Le nombre de serveur maximum que le bot peut rejoindre 
     }
 }
