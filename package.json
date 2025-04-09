@@ -1,8 +1,8 @@
 {
-  "name": "4protect",
+  "name": "Rush bot",
   "version": "1.2",
   "description": "Un bot Discord pour la gestion des serveurs",
-  "author": "4wip",
+  "author": "Jaren",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
