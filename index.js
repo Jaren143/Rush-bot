@@ -1,7 +1,6 @@
-const { Client, Intents, Collection } = require('discord.js');
+const { Client, Intents, MessageActionRow, MessageButton } = require('discord.js');
 const Discord = require("discord.js");
 const config = require('./config');
-const ping = require('./ping.js');
 const { readdirSync } = require("fs");
 const db = require('quick.db');
 const p = new db.table("Prefix");
@@ -31,7 +30,7 @@ const client = new Client({
     partials: ["USER", "CHANNEL", "GUILD_MEMBER", "MESSAGE", "REACTION"]
 });
 
-client.login(process.env.token); // Tu peux remplacer par client.login("TonToken")
+client.login(process.env.token); // Remplace par client.login("TonToken")
 client.commands = new Collection();
 
 const { GiveawaysManager } = require('discord-giveaways');
@@ -46,40 +45,9 @@ client.giveawaysManager = new GiveawaysManager(client, {
 });
 
 //|▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬| HANDLER |▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬|
-
 const commandFiles = readdirSync('./moderation').filter(file => file.endsWith('.js'));
 for (const file of commandFiles) {
     const command = require(`./moderation/${file}`);
-    client.commands.set(command.name, command);
-}
-
-const parametreFiles = readdirSync('./parametre').filter(file => file.endsWith('.js'));
-for (const file of parametreFiles) {
-    const command = require(`./parametre/${file}`);
-    client.commands.set(command.name, command);
-}
-
-const gestionFiles = readdirSync('./gestion').filter(file => file.endsWith('.js'));
-for (const file of gestionFiles) {
-    const command = require(`./gestion/${file}`);
-    client.commands.set(command.name, command);
-}
-
-const utilitaireFiles = readdirSync('./utilitaire').filter(file => file.endsWith('.js'));
-for (const file of utilitaireFiles) {
-    const command = require(`./utilitaire/${file}`);
-    client.commands.set(command.name, command);
-}
-
-const logsFiles = readdirSync('./logs').filter(file => file.endsWith('.js'));
-for (const file of logsFiles) {
-    const command = require(`./logs/${file}`);
-    client.commands.set(command.name, command);
-}
-
-const antiraidFiles = readdirSync('./antiraid').filter(file => file.endsWith('.js'));
-for (const file of antiraidFiles) {
-    const command = require(`./antiraid/${file}`);
     client.commands.set(command.name, command);
 }
 
@@ -94,37 +62,43 @@ for (const file of eventFiles) {
 }
 
 //|▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬| INTERACTION BUTTON FIX |▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬|
-
 client.on('interactionCreate', async (interaction) => {
     // Vérifie si l'interaction est un bouton
     if (!interaction.isButton()) return;
 
     try {
         // Vérifie si l'interaction a déjà été traitée (répondue ou différée)
-        if (!interaction.replied && !interaction.deferred) {
+        if (!interaction.deferred && !interaction.replied) {
             await interaction.deferUpdate(); // Diffère l'interaction pour éviter l'erreur 'already acknowledged'
         }
 
         console.log(`Bouton cliqué: ${interaction.customId}`); // Log de l'ID du bouton cliqué
 
         // Gère les différents boutons en fonction de leur customId
-        if (interaction.customId === 'suivant') {
-            // Logique pour le bouton "suivant"
-            console.log("Bouton suivant cliqué");
-            // Ajoute ta logique ici (par exemple, changement de message ou autre)
-        } else if (interaction.customId === 'precedent') {
-            // Logique pour le bouton "précédent"
-            console.log("Bouton précédent cliqué");
-            // Ajoute ta logique ici
-        }
+        switch (interaction.customId) {
+            case 'suivant':
+                // Logique pour le bouton "suivant"
+                console.log("Bouton suivant cliqué");
+                // Ajoute ta logique ici (par exemple, changer de message, etc.)
+                break;
 
+            case 'precedent':
+                // Logique pour le bouton "précédent"
+                console.log("Bouton précédent cliqué");
+                // Ajoute ta logique ici
+                break;
+
+            // Si tu as d'autres boutons, ajoute des cases comme ci-dessus
+            default:
+                console.log('Bouton inconnu');
+                break;
+        }
     } catch (err) {
         console.error('Erreur interactionCreate :', err); // Log des erreurs
     }
 });
 
 //|▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬| ANTI-CRASH |▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬|
-
 process.on("unhandledRejection", (reason, p) => {
     if (reason.code === 50007) return;
     if (reason.code == 10062) return;
@@ -141,20 +115,29 @@ process.on("multipleResolves", (type, promise, reason) => {
     console.log(type, promise, reason);
 });
 
-var regToken = /[\w\d]{24}\.[\w\d]{6}\.[\w\d-_]{27}/g;
-client.on("warn", e => {
-    console.log(e.replace(regToken, "[REDACTED]"));
+// Fonction pour envoyer un message avec des boutons
+client.on('messageCreate', async (message) => {
+    if (message.content === '!test') {
+        const row = new MessageActionRow()
+            .addComponents(
+                new MessageButton()
+                    .setCustomId('suivant')  // Identifiant du bouton
+                    .setLabel('Suivant')     // Label visible sur le bouton
+                    .setStyle('PRIMARY'),    // Style du bouton
+                new MessageButton()
+                    .setCustomId('precedent')
+                    .setLabel('Précédent')
+                    .setStyle('SECONDARY')
+            );
+
+        // Envoi du message avec les boutons
+        await message.channel.send({
+            content: 'Cliquez sur un des boutons !',
+            components: [row]
+        });
+    }
 });
 
-client.on("error", e => {
-    console.log(e.replace(regToken, "[REDACTED]"));
-});
-
-client.snipes = new Map();
-client.on('messageDelete', function (message, channel) {
-    client.snipes.set(message.channel.id, {
-        content: message.content,
-        author: message.author,
-        image: message.attachments.first() ? message.attachments.first().proxyURL : null
-    });
+client.on('ready', () => {
+    console.log(`Bot connecté en tant que ${client.user.tag}`);
 });
